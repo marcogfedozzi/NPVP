@@ -6,7 +6,6 @@ import shutil
 import os
 from tqdm import tqdm
 
-#Requirements: tensorflow 2.6.0
 def read_BAIR_tf2_record(records_dir, save_dir):
     """
     Args:
@@ -83,9 +82,6 @@ def resize_im(features, image_name, conf, height = None):
     return image
 
 if __name__ == '__main__':
-    """
-    read_BAIR_tf2_record('/store/travail/xiyex/BAIR/softmotion30_44k/test/traj_0_to_255.tfrecords',
-                   '/store/travail/xiyex/BAIR/softmotion30_44k/test')
-    """
-    
-    read_BAIR_tf2_record('/store/travail/xiyex/BAIR/softmotion30_44k/train', '/store/travail/xiyex/BAIR/softmotion30_44k/train')
+    for d_type in ('train', 'test'):
+        read_BAIR_tf2_record(f'/usr/local/src/robot/datasets/bair_robot_pushing_dataset_v0/softmotion30_44k/{d_type}', f'/usr/local/src/robot/model/NPVP/data/bair/{d_type}')
+    #read_BAIR_tf2_record('/usr/local/src/robot/datasets/bair_robot_pushing_dataset_v0/softmotion30_44k/test', '/usr/local/src/robot/models/NPVP/data/bair/test')

@@ -1,8 +1,8 @@
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.callbacks import Callback
-from pytorch_lightning import loggers as pl_loggers
-from pytorch_lightning.plugins import PrecisionPlugin
+import lightning.pytorch as pl
+from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch.callbacks import Callback
+from lightning.pytorch import loggers as pl_loggers
+from lightning.pytorch.plugins import PrecisionPlugin
 
 from models import LitPredictor
 from utils import LitDataModule, VisCallbackPredictor

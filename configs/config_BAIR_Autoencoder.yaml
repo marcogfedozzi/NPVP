@@ -3,11 +3,11 @@ Env:
     rand_seed: 3047
     port: '12355'
     strategy: 'ddp_find_unused_parameters_false'
-    visual_callback: True ###!!!!!Set this to be False for Multi-GPU training, otherwise the training would stuck
+    visual_callback: False ###!!!!!Set this to be False for Multi-GPU training, otherwise the training would stuck
 
 Dataset:
     name: "BAIR" #Name of the dataset, 'KTH', 'SMMNIST', 'BAIR', 'Cityscapes', 'KITTI'
-    dir: "../BAIR" #Dataset Folder
+    dir: "/scratch/data/bair" #Dataset Folder
     dev_set_size: null #number of examples for dev set
     num_workers: 16
     img_channels: 3
@@ -16,12 +16,12 @@ Dataset:
     test_num_past_frames: 2
     test_num_future_frames: 28
     batch_size: 8
-    phase: 'deploy' #'debug' phase, split train/val; 'deploy' phase, no val set
+    phase: 'debug' #'debug' phase, split train/val; 'deploy' phase, no val set
 
 #Configuration for the autoencoder
 AE:
-    ckpt_save_dir: "./NPVP_ckpts/BAIR_ResnetAE" #autoencoder checkpoinrt save dir
-    tensorboard_save_dir: "./NPVP_ckpts/BAIR_ResnetAE_tensorboard"
+    ckpt_save_dir: "/scratch/NPVP_ckpts/BAIR_ResnetAE" #autoencoder checkpoinrt save dir
+    tensorboard_save_dir: "/scratch/NPVP_ckpts/BAIR_ResnetAE_tensorboard"
     resume_ckpt: null #null or path string for the resume checkpoint
     start_epoch: 0
 
@@ -37,11 +37,11 @@ AE:
 
 #Configuration for the NP-based predictor
 Predictor:
-    ckpt_save_dir: "./NPVP_ckpts/BAIR_Predictor_VFP_stochastic_4to5"
-    tensorboard_save_dir: "./NPVP_ckpts/BAIR_Predictor_VFP_stochastic_4to5_tensorboard"
+    ckpt_save_dir: /scratch/NPVP_ckpts/BAIR_Predictor_VFP_stochastic_4to5"
+    tensorboard_save_dir: "/scratch/NPVP_ckpts/BAIR_Predictor_VFP_stochastic_4to5_tensorboard"
     resume_ckpt: null #null or path string for the resume checkpoint
     init_det_ckpt_for_vae: null #null or path string for a trained deterministic model, which serves as the initialization of stochastic model
-    resume_AE_ckpt: "./NPVP_ckpts/BAIR_ResnetAE/AE-epoch=299.ckpt" #path string for the trained autoencoder in stage one.
+    resume_AE_ckpt: "/scratch/NPVP_ckpts/BAIR_ResnetAE/AE-epoch=299.ckpt" #path string for the trained autoencoder in stage one.
     start_epoch: 0
     
     epochs: 500

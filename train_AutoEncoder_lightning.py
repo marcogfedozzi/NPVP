@@ -1,6 +1,6 @@
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning import loggers as pl_loggers
+import lightning.pytorch as pl
+from lightning.pytorch.callbacks import ModelCheckpoint
+from lightning.pytorch import loggers as pl_loggers
 
 from models import LitAE
 from utils import LitDataModule, VisCallbackAE, save_code_cfg
@@ -39,7 +39,7 @@ def main(cfg : DictConfig) -> None:
 
     trainer = pl.Trainer(accelerator="gpu", devices=cfg.Env.world_size,
                          max_epochs=cfg.AE.epochs, enable_progress_bar=True, sync_batchnorm=True,
-                         callbacks = callbacks, logger=tb_logger, strategy = cfg.Env.strategy)
+                         callbacks=callbacks, logger=tb_logger, strategy=cfg.Env.strategy)
     trainer.fit(AE, data_module, ckpt_path=cfg.AE.resume_ckpt)
 
 if __name__ == '__main__':

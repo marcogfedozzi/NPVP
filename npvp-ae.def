@@ -1,0 +1,31 @@
+# Singularity definition file to build a container with Python 3.11 and libraries
+
+Bootstrap: docker
+From: python:3.11-bullseye
+
+# %environment
+#     export PATH="/usr/local/bin:$PATH"
+
+%files
+    ./models .
+    ./utils .
+    ./requirements.txt .
+    ./train_AutoEncoder_lightning.py .
+
+
+%post
+    # Install necessary packages and dependencies
+    apt-get update
+
+    # Install Python packages
+    pip3 install -r requirements.txt
+
+%runscript
+    # Run a Python script inside the container
+    lightning run model train_AutoEncoder_lightning.py --config_path  ./configs/"$@" --accelerator=gpu --precision=bf16-mixed --strategy='ddp'
+
+%labels
+    Maintainer="Marco Gabriele Fedozzi <marco.fedozzi@iit.it>"
+    Version="1.0"
+
+# e. path to pass config_BAIR_Autoencoder.yaml

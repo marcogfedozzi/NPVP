@@ -6,8 +6,8 @@ from pathlib import Path
 import shutil
 from collections import OrderedDict
 
-import pytorch_lightning as pl
-from pytorch_lightning.callbacks import Callback
+import lightning.pytorch as pl
+from lightning.pytorch.callbacks import Callback
 
 def save_code_cfg(cfg, ckpt_dir):
     #Save the code and config.ymal

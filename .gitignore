@@ -1,0 +1,41 @@
+## Refactored Dataset
+
+data/
+
+## Keras
+
+.keras/
+.nv/
+
+# Notebook
+
+**/.ipynb_checkpoints
+
+## Python
+
+**/__pycache__
+
+## Tensorboard logs
+
+**/log
+**/runs
+
+# Singularity Images
+
+*.sif
+
+## Saved models
+
+NPVP_ckpts/
+
+## Cache
+
+.cache
+
+## Purposefully untracked files
+
+**_IGNR*
+
+# Venv
+
+venv-npvp/

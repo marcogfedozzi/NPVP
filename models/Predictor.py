@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import functools
 #import torch.nn.utils.spectral_norm as spectral_norm
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 from models import L1Loss, Div_KL, GANLoss
 

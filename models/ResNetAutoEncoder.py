@@ -2,7 +2,7 @@ from torch import nn
 import torch
 import functools
 from torch.nn import init
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 from .criterion import L1Loss
 """
 Modified based on https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/models/networks.py

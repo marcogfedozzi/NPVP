@@ -6,7 +6,7 @@ import torchvision.transforms as transforms
 from torchvision import datasets
 from torch.utils.data import Dataset, DataLoader, ConcatDataset, random_split
 from torch import Tensor
-import pytorch_lightning as pl
+import lightning.pytorch as pl
 
 import numpy as np
 from PIL import Image
