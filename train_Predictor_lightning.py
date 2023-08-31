@@ -3,6 +3,8 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.callbacks import Callback
 from lightning.pytorch import loggers as pl_loggers
 from lightning.pytorch.plugins import PrecisionPlugin
+from lightning.pytorch.callbacks import TQDMProgressBar
+
 
 from models import LitPredictor
 from utils import LitDataModule, VisCallbackPredictor
@@ -19,10 +21,12 @@ def parse_args():
     args = parser.parse_args()
     return args.config_path
 
-#@hydra.main(version_base=None, config_path=".", config_name="config")
+@hydra.main(version_base=None, config_path="./configs", config_name="config")
 def main(cfg : DictConfig) -> None:
     #save the code and config
     #save_code_cfg(cfg, cfg.Predictor.ckpt_save_dir)
+
+    cfg = hydra.utils.instantiate(cfg)
 
     pl.seed_everything(cfg.Env.rand_seed, workers=True)
     #init model and dataloader
@@ -36,10 +40,18 @@ def main(cfg : DictConfig) -> None:
         callbacks = [VisCallbackPredictor(), checkpoint_callback]
     else:
         callbacks = [checkpoint_callback]
+
+    callbacks.append(TQDMProgressBar(refresh_rate=10))
+
+
     tb_logger = pl_loggers.TensorBoardLogger(save_dir=cfg.Predictor.tensorboard_save_dir)
-    trainer = pl.Trainer(accelerator="gpu", devices=cfg.Env.world_size,
+    trainer = pl.Trainer(
+        #accelerator="gpu", devices=cfg.Env.world_size,
                          max_epochs=cfg.Predictor.epochs, enable_progress_bar=True, sync_batchnorm=True,
-                         callbacks = callbacks, logger=tb_logger, strategy = cfg.Env.strategy)
+                         callbacks = callbacks, logger=tb_logger, strategy = cfg.Env.strategy,
+                         check_val_every_n_epoch=10,
+                         )
+    
     if cfg.Predictor.init_det_ckpt_for_vae is not None and cfg.Predictor.resume_ckpt is None:
         predictor = predictor.load_from_checkpoint(cfg = cfg, checkpoint_path=cfg.Predictor.init_det_ckpt_for_vae,
                                                    strict = False)
@@ -49,8 +61,4 @@ def main(cfg : DictConfig) -> None:
         trainer.fit(predictor, data_module, ckpt_path=cfg.Predictor.resume_ckpt)
 
 if __name__ == '__main__':
-    config_path = Path(parse_args())
-    initialize(version_base=None, config_path=str(config_path.parent))
-    cfg = compose(config_name=str(config_path.name))
-
-    main(cfg)
+    main()

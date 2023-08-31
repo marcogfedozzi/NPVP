@@ -6,8 +6,8 @@ Env:
     visual_callback: True ###!!!!!Set this to be False for Multi-GPU training, otherwise the training would stuck
 
 Dataset:
-    name: "BAIR" #Name of the dataset, 'KTH', 'SMMNIST', 'BAIR', 'Cityscapes', 'KITTI'
-    dir: "../BAIR" #Dataset Folder
+    name: "DMBN" #Name of the dataset, 'KTH', 'SMMNIST', 'BAIR', 'DMBN', 'Cityscapes', 'KITTI'
+    dir: "./data/dmbn" #Dataset Folder
     dev_set_size: null #number of examples for dev set
     num_workers: 16
     img_channels: 3
@@ -15,13 +15,13 @@ Dataset:
     num_future_frames: 10
     test_num_past_frames: 2
     test_num_future_frames: 28
-    batch_size: 8
-    phase: 'deploy' #'debug' phase, split train/val; 'deploy' phase, no val set
+    batch_size: 4
+    phase: 'debug' #'debug' phase, split train/val; 'deploy' phase, no val set
 
 #Configuration for the autoencoder
 AE:
-    ckpt_save_dir: "./NPVP_ckpts/BAIR_ResnetAE" #autoencoder checkpoinrt save dir
-    tensorboard_save_dir: "./NPVP_ckpts/BAIR_ResnetAE_tensorboard"
+    ckpt_save_dir: "./NPVP_ckpts/DMBN_ResnetAE" #autoencoder checkpoinrt save dir
+    tensorboard_save_dir: "./NPVP_ckpts/DMBN_ResnetAE_tensorboard"
     resume_ckpt: null #null or path string for the resume checkpoint
     start_epoch: 0
 
@@ -37,19 +37,19 @@ AE:
 
 #Configuration for the NP-based predictor
 Predictor:
-    ckpt_save_dir: "./NPVP_ckpts/BAIR_Predictor_VFP_NPVP-S"
-    tensorboard_save_dir: "./NPVP_ckpts/BAIR_Predictor_VFP_NPVP_S_tensorboard"
+    ckpt_save_dir: "./NPVP_ckpts/DMBN_Predictor_VFP_NPVP-S"
+    tensorboard_save_dir: "./NPVP_ckpts/DMBN_Predictor_VFP_NPVP_S_tensorboard"
     resume_ckpt: null #null or path string for the resume checkpoint
     init_det_ckpt_for_vae: null #null or path string for a trained deterministic model, which serves as the initialization of stochastic model
-    resume_AE_ckpt: "./NPVP_ckpts/BAIR_ResnetAE/AE-epoch=299.ckpt" #path string for the trained autoencoder in stage one.
+    resume_AE_ckpt: "./NPVP_ckpts/DMBN_ResnetAE/AE-epoch=499.ckpt" #path string for the trained autoencoder in stage one.
     start_epoch: 0
     
     epochs: 500
-    log_per_epochs: 5 #training log frequency
+    log_per_epochs: 50 #training log frequency
 
-    rand_context: False #use random context for the learning (i.e.,for unified model)
+    rand_context: True #use random context for the learning (i.e.,for unified model)
     min_lo: 2 #Minimum length of the observed clip, not used if rand_context is False
-    max_lo: 6 #maximum length of the observed clip, not used if rand_context is False
+    max_lo: 10 #maximum length of the observed clip, not used if rand_context is False
 
     VFI: False #video frame interpolation training mode
     context_num_p: 2 #number of past frames
@@ -60,12 +60,12 @@ Predictor:
     max_W: 8 #Width for the frame visual feature extracted by the CNN encoder
     max_T: 12 #!! equals to (num_past_frames + num_future_frames) in the Dataset configuration
 
-    embed_dim: 256 #Channels for the frame visual feature extracted by the CNN encoder
+    embed_dim: 512 #Channels for the frame visual feature extracted by the CNN encoder
     fuse_method: 'Add'
     param_free_norm_type: 'layer'
     evt_former: True #if use VidHRFormerEncoder to learn event coding (other than mean)
     evt_former_num_layers: 4 #number of Transformer block for event encoding VidHRFormerEncoder, not used if evt_former is False
-    evt_hidden_channels: 128 #number of channels for event coding
+    evt_hidden_channels: 256 #number of channels for event coding
     stochastic: True #True for NPVP-S (stochastic), False for NPVP-D (deterministic)
     transformer_layers: 8 #number of Transformer block for Transformer decoder
 
@@ -76,7 +76,7 @@ Predictor:
     scheduler_T0: 150 #Epochs for each cycle of cosine learning rate schedule
 
     lam_PF_L1: 0.01 #weight for the predicted feature l1 loss
-    KL_beta: 1e-6 #1e-6 for SMMNIST and BAIR, 1e-8 for all other dataset
+    KL_beta: 1e-6 #1e-6 for SMMNIST and DMBN, 1e-8 for all other dataset
 
     use_gan: False #GAN loss is Deprecated, not used in the experiments.
     lam_gan: 0.001

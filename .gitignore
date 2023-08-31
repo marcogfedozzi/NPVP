@@ -1,11 +1,15 @@
 ## Refactored Dataset
 
-data/
+data/*
+data/dmbn/*
+!data/dmbn
+!data/dmbn/refactor_dmbn.sh
 
-## Keras
+## development Environment
 
 .keras/
 .nv/
+.vscode/
 
 # Notebook
 
@@ -39,3 +43,7 @@ NPVP_ckpts/
 # Venv
 
 venv-npvp/
+
+## Hydra
+
+outputs/

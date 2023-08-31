@@ -37,27 +37,36 @@ class LitDataModule(pl.LightningDataModule):
             self.test_transform = transforms.Compose([VidCenterCrop((120, 120)), VidResize((64, 64)), VidToTensor(), self.norm_transform])
             self.val_person_ids = [5]
         
-        if cfg.Dataset.name == 'KITTI':
+        elif cfg.Dataset.name == 'KITTI':
             self.norm_transform = VidNormalize((0.44812047, 0.47147775, 0.4677183),(1.5147436, 1.5871466, 1.5925455))
             self.renorm_transform = VidReNormalize((0.44811612, 0.47147346, 0.46771598),(1.5177081, 1.5897311, 1.5952978))
             self.train_transform = transforms.Compose([VidResize((128, 128)), VidRandomHorizontalFlip(0.5), VidRandomVerticalFlip(0.5), VidToTensor(), self.norm_transform])
             self.test_transform = transforms.Compose([VidResize((128, 128)), VidToTensor(), self.norm_transform])
 
-        if cfg.Dataset.name == 'SMMNIST':
+        elif cfg.Dataset.name == 'SMMNIST':
             self.renorm_transform = VidReNormalize(mean = 0., std = 1.0)
             self.train_transform = self.test_transform = VidToTensor()
 
-        if cfg.Dataset.name == 'BAIR':
+        elif cfg.Dataset.name == 'BAIR':
             self.norm_transform = VidNormalize((0.61749697, 0.6050092, 0.52180636), (2.1824553, 2.1553133, 1.9115673))
             self.renorm_transform = VidReNormalize((0.61749697, 0.6050092, 0.52180636), (2.1824553, 2.1553133, 1.9115673))
             self.train_transform = transforms.Compose([VidRandomHorizontalFlip(0.5), VidRandomVerticalFlip(0.5), VidToTensor(), self.norm_transform])
             self.test_transform = transforms.Compose([VidToTensor(), self.norm_transform])
 
-        if cfg.Dataset.name == 'CityScapes':
+        elif cfg.Dataset.name == 'CityScapes':
             self.norm_transform = VidNormalize((0.31604213, 0.35114038, 0.3104223),(1.2172801, 1.3219808, 1.2082524))
             self.renorm_transform = VidReNormalize((0.31604213, 0.35114038, 0.3104223),(1.2172801, 1.3219808, 1.2082524))
             self.train_transform = transforms.Compose([VidToTensor(), self.norm_transform])
             self.test_transform = transforms.Compose([VidToTensor(), self.norm_transform])
+
+
+        elif cfg.Dataset.name == 'DMBN':
+            # NOTE: try not to normalize the dataset
+            self.norm_transform = VidNormalize((0.1615629, 0.16768706, 0.16431035), (1.0781887, 1.1318116, 1.1069493))
+            self.renorm_transform = VidReNormalize((0.1615629, 0.16768706, 0.16431035), (1.0781887, 1.1318116, 1.1069493))
+            self.train_transform = transforms.Compose([VidRandomHorizontalFlip(0.5), VidRandomVerticalFlip(0.5), VidToTensor(), self.norm_transform])
+            self.test_transform = transforms.Compose([VidToTensor(), self.norm_transform])
+
 
     def setup(self, stage: Optional[str] = None):
         if not self.cfg.Predictor.rand_context:
@@ -71,13 +80,13 @@ class LitDataModule(pl.LightningDataModule):
                                           val_person_ids = self.val_person_ids, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)#, actions = ['walking_no_empty'])
                 self.train_set, self.val_set = KTHTrainData()
             
-            if self.cfg.Dataset.name == 'KITTI':
+            elif self.cfg.Dataset.name == 'KITTI':
                 KITTITrainData = KITTIDataset(self.cfg.Dataset.dir, [10, 11, 12, 13], transform = self.train_transform, train = True, val = True,
                                                 num_past_frames= self.cfg.Dataset.num_past_frames, num_future_frames= self.cfg.Dataset.num_future_frames,
                                                 min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)
                 self.train_set, self.val_set = KITTITrainData()
 
-            if self.cfg.Dataset.name == 'BAIR':
+            elif self.cfg.Dataset.name == 'BAIR':
                 BAIR_train_whole_set = BAIRDataset(Path(self.cfg.Dataset.dir).joinpath('train'), self.train_transform, color_mode = 'RGB', 
                                                    num_past_frames = self.cfg.Dataset.num_past_frames, num_future_frames = self.cfg.Dataset.num_future_frames,
                                                    min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
@@ -86,7 +95,7 @@ class LitDataModule(pl.LightningDataModule):
                 BAIR_val_set_length = len(BAIR_train_whole_set) - BAIR_train_set_length
                 self.train_set, self.val_set = random_split(BAIR_train_whole_set, [BAIR_train_set_length, BAIR_val_set_length],
                                                             generator=torch.Generator().manual_seed(2021))
-            if self.cfg.Dataset.name == 'CityScapes':
+            elif self.cfg.Dataset.name == 'CityScapes':
                 self.train_set = CityScapesDataset(Path(self.cfg.Dataset.dir).joinpath('train'), self.train_transform, color_mode = 'RGB', 
                                                    num_past_frames = self.cfg.Dataset.num_past_frames, num_future_frames = self.cfg.Dataset.num_future_frames,
                                                    min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
@@ -94,7 +103,7 @@ class LitDataModule(pl.LightningDataModule):
                                                    num_past_frames = self.cfg.Dataset.num_past_frames, num_future_frames = self.cfg.Dataset.num_future_frames,
                                                    min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
 
-            if self.cfg.Dataset.name == 'SMMNIST':
+            elif self.cfg.Dataset.name == 'SMMNIST':
                 self.train_set = StochasticMovingMNIST(True, Path(self.cfg.Dataset.dir), self.cfg.Dataset.num_past_frames, self.cfg.Dataset.num_future_frames, self.train_transform, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)
                 train_val_ratio = 0.95
                 SMMNIST_train_set_length = int(len(self.train_set) * train_val_ratio)
@@ -102,6 +111,17 @@ class LitDataModule(pl.LightningDataModule):
                 self.train_set, self.val_set = random_split(self.train_set, [SMMNIST_train_set_length, SMMNIST_val_set_length],
                                                             generator=torch.Generator().manual_seed(2021))
             
+            
+            elif self.cfg.Dataset.name == 'DMBN':
+                DMBN_train_whole_set = DMBNDataset(Path(self.cfg.Dataset.dir).joinpath('train'), self.train_transform, color_mode = 'RGB', 
+                                                   num_past_frames = self.cfg.Dataset.num_past_frames, num_future_frames = self.cfg.Dataset.num_future_frames,
+                                                   min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
+                train_val_ratio = 0.90
+                DMBN_train_set_length = int(len(DMBN_train_whole_set) * train_val_ratio)
+                DMBN_val_set_length = len(DMBN_train_whole_set) - DMBN_train_set_length
+                self.train_set, self.val_set = random_split(DMBN_train_whole_set, [DMBN_train_set_length, DMBN_val_set_length],
+                                                            generator=torch.Generator().manual_seed(2021))
+
             #Use all training dataset for the final training
             if self.cfg.Dataset.phase == 'deploy':
                 self.train_set = ConcatDataset([self.train_set, self.val_set])
@@ -121,23 +141,28 @@ class LitDataModule(pl.LightningDataModule):
                                         num_past_frames= self.cfg.Dataset.test_num_past_frames, num_future_frames= self.cfg.Dataset.test_num_future_frames, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)#, actions = ['walking_no_empty'])
                 self.test_set = KTHTestData()
             
-            if self.cfg.Dataset.name == 'KITTI':
+            elif self.cfg.Dataset.name == 'KITTI':
                 KITTITrainData = KITTIDataset(self.cfg.Dataset.dir, [10, 11, 12, 13], transform = self.train_transform, train = False, val = False,
                                                 num_past_frames= self.cfg.Dataset.num_past_frames, num_future_frames= self.cfg.Dataset.num_future_frames,
                                                 min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)
                 self.test_set = KITTITrainData()
 
-            if self.cfg.Dataset.name == 'BAIR':
+            elif self.cfg.Dataset.name == 'BAIR':
                 self.test_set = BAIRDataset(Path(self.cfg.Dataset.dir).joinpath('test'), self.test_transform, color_mode = 'RGB', 
                                             num_past_frames= self.cfg.Dataset.test_num_past_frames, num_future_frames= self.cfg.Dataset.test_num_future_frames, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
-            if self.cfg.Dataset.name == 'CityScapes':
+            elif self.cfg.Dataset.name == 'CityScapes':
                 self.test_set = CityScapesDataset(Path(self.cfg.Dataset.dir).joinpath('test'), self.train_transform, color_mode = 'RGB', 
                                                    num_past_frames = self.cfg.Dataset.num_past_frames, num_future_frames = self.cfg.Dataset.num_future_frames,
                                                    min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
 
-            if self.cfg.Dataset.name == 'SMMNIST':
+            elif self.cfg.Dataset.name == 'SMMNIST':
                 self.test_set = StochasticMovingMNIST(False, Path(self.cfg.Dataset.dir), self.cfg.Dataset.test_num_past_frames, self.cfg.Dataset.test_num_future_frames, self.train_transform, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)
             
+            elif self.cfg.Dataset.name == 'DMBN':
+                self.test_set = DMBNDataset(Path(self.cfg.Dataset.dir).joinpath('test'), self.test_transform, color_mode = 'RGB', 
+                                            num_past_frames= self.cfg.Dataset.test_num_past_frames, num_future_frames= self.cfg.Dataset.test_num_future_frames, min_lo = self.cfg.Predictor.min_lo, max_lo = self.cfg.Predictor.max_lo)()
+            
+
             self.len_test_loader = len(self.test_dataloader())
         
 
@@ -245,6 +270,7 @@ def get_dataloader(data_set_name, batch_size, data_set_dir, test_past_frames = 1
                                 num_past_frames = 2, num_future_frames = 10)()
         test_set = CityScapesDataset(dataset_dir.joinpath('test'), transform, color_mode = 'RGB', 
                                 num_past_frames = test_past_frames, num_future_frames = test_future_frames)()
+
 
     if dev_set_size is not None:
         train_set, _ = random_split(train_set, [dev_set_size, len(train_set) - dev_set_size], generator=torch.Generator().manual_seed(2021))
@@ -412,6 +438,34 @@ class BAIRDataset(object):
                 clips.append(img_files[i*self.clip_length : (i+1)*self.clip_length])
 
         return clips
+    
+
+class DMBNDataset(BAIRDataset):
+    """
+    DMBN dataset, a wrapper for ClipDataset
+    the original frame size is (H, W) = (128, 128)
+    """
+    def __init__(self, frames_dir: str, transform, color_mode = 'RGB', 
+                 num_past_frames = 10, num_future_frames = 10, min_lo = None, max_lo = None):
+        super().__init__(frames_dir, transform, color_mode, 
+                 num_past_frames, num_future_frames, min_lo, max_lo)
+        
+    
+    def __getClips__(self):
+        clips = []
+        frames_folders = os.listdir(self.frames_path)
+        frames_folders = [self.frames_path.joinpath(s) for s in frames_folders]
+        for folder in frames_folders:
+            img_files = sorted(list(folder.glob('*.png')))
+            # with open(folder.joinpath('label.txt'), 'r') as f:
+            #     label = f.read()
+            clip_num = len(img_files) // self.clip_length
+            rem_num = len(img_files) % self.clip_length
+            img_files = img_files[rem_num // 2 : rem_num//2 + clip_num*self.clip_length]
+            for i in range(clip_num):
+                clips.append(img_files[i*self.clip_length : (i+1)*self.clip_length])
+
+        return clips
 
 class CityScapesDataset(BAIRDataset):
     def __init__(self, *args, **kwargs):
@@ -558,6 +612,7 @@ class ClipDataset(Dataset):
             index = index.to_list()
         
         clip_imgs = self.clips[index]
+
         imgs = []
         for img_path in clip_imgs:
             if self.color_mode == 'RGB':
@@ -993,9 +1048,9 @@ if __name__ == '__main__':
         past_clip, future_clip = next(train_iter)
     train_set.visualize_clip(past_clip, 'past_clip.gif')
     train_set.visualize_clip(future_clip, 'future_clip.gif')
+    
 
-
-    transform = transform = transforms.Compose([VidToTensor()])
+    transform = transforms.Compose([VidToTensor()])
     BAIR_dataset = BAIRDataset('/store/travail/xiyex/BAIR/softmotion30_44k/train', transform,
                                     color_mode = 'RGB', num_past_frames = 5, num_future_frames = 10)
     bair_train_set = BAIR_dataset()
@@ -1031,11 +1086,11 @@ if __name__ == '__main__':
     transform = transform = transforms.Compose([VidToTensor()])
     city_scapes_dataset = CityScapesDataset('/home/travail/xiyex/CityScapes/train', transform, color_mode = 'RGB', num_past_frames = 2, num_future_frames = 10)()
     """
-    transform = transforms.Compose([VidResize((128, 128)), VidToTensor()])
-    kitti_train = KITTIDataset('/home/travail/xiyex/KITTI_Processed', [10, 11], transform, True, False, 4, 5)()
-    kitti_test = KITTIDataset('/home/travail/xiyex/KITTI_Processed', [10, 11], transform, False, False, 4, 5)()
-    kitti_set = ConcatDataset([kitti_test, kitti_train])
-    statistics = mean_std_compute(kitti_set, torch.device('cuda:0'), color_mode = 'RGB')
-    print(statistics)
 
-    
+    transform = transforms.Compose([VidToTensor()])
+    DMBN_dataset = DMBNDataset('/usr/local/src/robot/models/NPVP/data/dmbn/train', transform,
+                                    color_mode = 'RGB', num_past_frames = 10, num_future_frames = 10)
+    dmbn_train_set = DMBN_dataset()
+
+    statistics = mean_std_compute(dmbn_train_set, torch.device('cuda:0'), color_mode = 'RGB')
+    print(statistics)
