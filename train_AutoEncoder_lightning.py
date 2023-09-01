@@ -46,7 +46,8 @@ def main(cfg : DictConfig) -> None:
                          max_epochs=cfg.AE.epochs, enable_progress_bar=True, sync_batchnorm=True,
                          callbacks=callbacks, logger=tb_logger, strategy=cfg.Env.strategy,
                          check_val_every_n_epoch=10,
-                         benchmark=True)
+                         benchmark=True,
+                         accumulate_grad_batches=cfg.Dataset.accumulate_grad_batches)
     trainer.fit(AE, data_module, ckpt_path=cfg.AE.resume_ckpt)
 
 if __name__ == '__main__':

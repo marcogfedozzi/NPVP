@@ -15,7 +15,8 @@ Dataset:
     num_future_frames: 5
     test_num_past_frames: 4
     test_num_future_frames: 5
-    batch_size: 16
+    batch_size: 1
+	accumulate_grad_batches: 4 # effectively multiples the batch size6
     phase: 'deploy' #'debug' phase, split train/val; 'deploy' phase, no val set
 
 #Configuration for the autoencoder

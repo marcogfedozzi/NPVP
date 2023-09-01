@@ -49,7 +49,7 @@ def main(cfg : DictConfig) -> None:
         #accelerator="gpu", devices=cfg.Env.world_size,
                          max_epochs=cfg.Predictor.epochs, enable_progress_bar=True, sync_batchnorm=True,
                          callbacks = callbacks, logger=tb_logger, strategy = cfg.Env.strategy,
-                         check_val_every_n_epoch=10,
+                         check_val_every_n_epoch=10
                          )
     
     if cfg.Predictor.init_det_ckpt_for_vae is not None and cfg.Predictor.resume_ckpt is None:

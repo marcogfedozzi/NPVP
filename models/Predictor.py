@@ -59,6 +59,8 @@ class LitPredictor(pl.LightningModule):
 
         self.automatic_optimization = False #Manually optimization
 
+        self.accumulate_grad_batches = cfg.Dataset.accumulate_grad_batches # gradient accumulation, equivalent to increasing the batch size
+
         if self.cfg.Predictor.rand_context:
             print("training with random context")
             self.batch_process_fn = self.rand_context_batch_process
@@ -128,12 +130,14 @@ class LitPredictor(pl.LightningModule):
         pred_frames, future_frames, pred_future_feats, future_gt_feats, kl_loss = self.shared_step(batch, batch_idx)
         Image_L1_loss = self.l1_loss(pred_frames, future_frames)
         PF_L1_loss = self.PF_l1_loss(pred_future_feats, future_gt_feats)
-        loss = Image_L1_loss + PF_L1_loss + kl_loss
+        loss = (Image_L1_loss + PF_L1_loss + kl_loss) / self.accumulate_grad_batches
 
         self.manual_backward(loss)
 
-        nn.utils.clip_grad_norm_(self.predictor.transformer.parameters(), max_norm=self.cfg.Predictor.max_grad_norm, norm_type=2)
-        opt.step()
+        if (batch_idx + 1) % self.accumulate_grad_batches == 0:
+            nn.utils.clip_grad_norm_(self.predictor.transformer.parameters(), max_norm=self.cfg.Predictor.max_grad_norm, norm_type=2)
+            opt.step()
+            opt.zero_grad()
         
         self.log('loss_train', loss)
         self.log('Image_L1_train', Image_L1_loss)
