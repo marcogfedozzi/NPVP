@@ -257,6 +257,22 @@ def get_dataloader(data_set_name, batch_size, data_set_dir, test_past_frames = 1
 
         test_set = BAIRDataset(dataset_dir.joinpath('test'), transform, color_mode = 'RGB', 
                                 num_past_frames = test_past_frames, num_future_frames = test_future_frames)()
+    elif data_set_name == 'DMBN':
+        dataset_dir = Path(data_set_dir)
+        norm_transform = VidNormalize((0.1615629, 0.16768706, 0.16431035), (1.0781887, 1.1318116, 1.1069493))
+        renorm_transform = VidReNormalize((0.1615629, 0.16768706, 0.16431035), (1.0781887, 1.1318116, 1.1069493))
+        transform = transforms.Compose([VidToTensor(), norm_transform])
+
+        DMBN_train_whole_set = DMBNDataset(dataset_dir.joinpath('train'), transform, color_mode = 'RGB', 
+                                num_past_frames = 2, num_future_frames = 10)()
+        train_val_ratio = 0.9
+        DMBN_train_set_length = int(len(DMBN_train_whole_set) * train_val_ratio)
+        DMBN_val_set_length = len(DMBN_train_whole_set) - DMBN_train_set_length
+        train_set, val_set = random_split(DMBN_train_whole_set, [DMBN_train_set_length, DMBN_val_set_length],
+                                        generator=torch.Generator().manual_seed(2021))
+
+        test_set = DMBNDataset(dataset_dir.joinpath('test'), transform, color_mode = 'RGB', 
+                                num_past_frames = test_past_frames, num_future_frames = test_future_frames)()
     
     elif data_set_name == 'CityScapes':
         dataset_dir = Path(data_set_dir)
