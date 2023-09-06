@@ -54,11 +54,28 @@ for folder in $DIR_ROOT/*; do
                         if [ "$ACTION" == "grasp" ]; then
                             NUM=$((NUM+50))
                         fi
+                        NUM=$(printf "%04d" $NUM)
+
                         echo $ACTION > $subsubfolder/label.txt
                         mogrify -resize 64x64 $subsubfolder/*.jpeg
                         mogrify -format png $subsubfolder/*.jpeg
                         rm -rf $subsubfolder/*.jpeg
-                        mv $subsubfolder $folder/$NUM
+
+                        mkdir $folder/example_$NUM
+
+                        for file in $subsubfolder/*.png; do
+                            # Extract the name of the file without extension
+                            file_name=$(basename $file)
+                            file_extension="${file##*.}"
+                            file_name="${file_name%.*}"
+                            if [ "$file_extension" == "png" ]; then
+                                file_name=$(printf "%04d" $file_name)
+                            fi
+                            # Rename the file
+                            file_new="$file_name.$file_extension"
+                            
+                            mv $file $folder/example_$NUM/$file_new
+                        done
                     fi
                 done
             fi

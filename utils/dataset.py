@@ -459,7 +459,7 @@ class BAIRDataset(object):
 class DMBNDataset(BAIRDataset):
     """
     DMBN dataset, a wrapper for ClipDataset
-    the original frame size is (H, W) = (128, 128)
+    the original frame size is (H, W) = (64, 64)
     """
     def __init__(self, frames_dir: str, transform, color_mode = 'RGB', 
                  num_past_frames = 10, num_future_frames = 10, min_lo = None, max_lo = None):
@@ -477,8 +477,11 @@ class DMBNDataset(BAIRDataset):
             #     label = f.read()
             clip_num = len(img_files) // self.clip_length
             rem_num = len(img_files) % self.clip_length
+            # The code below takes the central "clip_num" sequences of a full video,
+            # therefore discarding the beginning and end of it, whichmight however be important
             img_files = img_files[rem_num // 2 : rem_num//2 + clip_num*self.clip_length]
             for i in range(clip_num):
+                #print(f"[DEBUG]: {[os.path.basename(i) for i in img_files[i*self.clip_length : (i+1)*self.clip_length]]}")
                 clips.append(img_files[i*self.clip_length : (i+1)*self.clip_length])
 
         return clips

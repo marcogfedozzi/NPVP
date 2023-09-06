@@ -15,15 +15,15 @@ Dataset:
     num_future_frames: 10
     test_num_past_frames: 2
     test_num_future_frames: 28
-    batch_size: 4
-	accumulate_grad_batches: 4 # effectively multiples the batch size
+    batch_size: 2
+    accumulate_grad_batches: 4 # effectively multiples the batch size
     phase: 'debug' #'debug' phase, split train/val; 'deploy' phase, no val set
 
 #Configuration for the autoencoder
 AE:
     ckpt_save_dir: "./NPVP_ckpts/DMBN_ResnetAE" #autoencoder checkpoinrt save dir
     tensorboard_save_dir: "./NPVP_ckpts/DMBN_ResnetAE_tensorboard"
-    resume_ckpt: null #null or path string for the resume checkpoint
+    resume_ckpt: "last" #null or path string for the resume checkpoint
     start_epoch: 0
 
     epochs: 500
