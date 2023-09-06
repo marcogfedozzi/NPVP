@@ -70,6 +70,10 @@ class LitPredictor(pl.LightningModule):
         else:
             print("training only for video frame prediction")
             self.batch_process_fn = self.normal_batch_process
+    
+    @functools.cached_property
+    def max_T(self):
+        return self.cfg.Predictor.max_T
 
     def forward(self, past_frames, future_frames = None):
         past_gt_feats = self.VPTR_Enc(past_frames)
